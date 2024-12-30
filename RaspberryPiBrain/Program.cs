@@ -4,6 +4,7 @@ namespace RaspberryPiBrain
 {
     public class Program
     {
+        public static string[] domNames = ["GoscinnyDuze", "GoscinnyMale", "Kuchnia", "Przedpokoj", "WC", "Sypialnia", "Aux", "ChoinkaLampka"];
         static void Main(string[] args)
         {
             try
@@ -19,34 +20,48 @@ namespace RaspberryPiBrain
 
                 // TODO Disable log Serial
 
+                // Zmienne do pamiętania poprzedniego stanu
+                bool[] networkState = new bool[8], arduinoState = new bool[8];
+
                 try
                 {
-                    bool MainLoop = true;
+                    bool MainLoop = true, first  = true, ChoinkaLampkaState = false;
 
                     while (MainLoop)
                     {
-                        if (networkManagement.NetworkModel == null)
-                        {
-                            Thread.Sleep(ApplicationSettings.LoopDelay);
-                            continue;
-                        }
+                        Thread.Sleep(ApplicationSettings.LoopDelay);
 
-                        foreach (var item in networkManagement.NetworkModel)
+                        if (networkManagement.NetworkModel != null)
                         {
-                            if("GoscinnyDuze" == item.Param)
+                            for (int i = 0; i < domNames.Length; i++)
                             {
-                                serialManagement.SendData(bool.Parse(item.Value) ? "onx" : "offx");
-                            }
-
-                            if ("Aux" == item.Param)
-                            {
-                                if(bool.Parse(item.Value))
+                                foreach (var item in networkManagement.NetworkModel)
                                 {
-                                    MainLoop = false;
-                                    break;
+                                    if(domNames[i] == item.Param)
+                                    {
+                                        bool newState = bool.Parse(item.Value);
+                                        if (newState != networkState[i] || first)
+                                        {
+                                            Logger.Write(domNames[i] + ": " + newState);
+                                            networkState[i] = newState;
+                                        }
+
+                                        if("ChoinkaLampka" == domNames[i])
+                                        {
+                                            ChoinkaLampkaState = newState;
+                                        }
+                                    }
                                 }
                             }
                         }
+
+                        byte data = 0b00000000;
+                        if (ChoinkaLampkaState) data += 0b00000001;
+                        if ((DateTime.Now.Hour >= 22) || (DateTime.Now.Hour <= 6)) data += 0b00000010;
+                        serialManagement.SendData([data]);
+
+
+                        first = false;
                     }
                 }
                 catch (Exception ex)
