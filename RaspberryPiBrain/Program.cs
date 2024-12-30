@@ -33,6 +33,7 @@ namespace RaspberryPiBrain
 
                 // Zmienne do pamiętania poprzedniego stanu
                 bool[] networkState = new bool[8], arduinoState = new bool[8];
+                byte lastDataSend = 0x00;
 
                 try
                 {
@@ -66,10 +67,15 @@ namespace RaspberryPiBrain
                             }
                         }
 
-                        byte data = 0b00000000;
+                        byte data = 0x30; // <- Początek licz w ASCII
                         if (ChoinkaLampkaState) data += 0b00000001;
                         if ((DateTime.Now.Hour >= 22) || (DateTime.Now.Hour <= 6)) data += 0b00000010;
-                        serialManagement.SendData([data]);
+
+                        if ((lastDataSend != data) || first)
+                        {
+                            serialManagement.SendData([data, 0x0D, 0x0A]);
+                            lastDataSend = data;
+                        }
 
 
                         first = false;
