@@ -14,6 +14,7 @@ namespace RaspberryPiBrain
                 Logger.Write("Run RaspberryPiBrain v0.01");
                 /* Główny program na RaspberryPi do komunikacji pomiędzy serwerem a SmartHome */
 
+                Console.WriteLine("Running on: " + Directory.GetCurrentDirectory());
                 Console.WriteLine("Dostępne porty COM:");
                 var ports = SerialManagement.GetAvailablePorts();
                 if (ports?.Length > 0)

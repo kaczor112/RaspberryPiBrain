@@ -56,15 +56,15 @@ namespace MainComponents
 
         public static void SaveModelToFile<TModel>(TModel model, string filePath)
         {
-            File.WriteAllText(filePath, JsonSerializer.Serialize(model, jsonOptions));
+            File.WriteAllText(Directory.GetCurrentDirectory() + filePath, JsonSerializer.Serialize(model, jsonOptions));
         }
 
         public static TModel? LoadModelFromFile<TModel>(string filePath)
         {
             // Plik nie istnieje, zwróć null
-            if (!File.Exists(filePath)) return default;
+            if (!File.Exists(Directory.GetCurrentDirectory() + filePath)) return default;
 
-            return JsonSerializer.Deserialize<TModel>(File.ReadAllText(filePath));
+            return JsonSerializer.Deserialize<TModel>(File.ReadAllText(Directory.GetCurrentDirectory() + filePath));
         }
     }
 }
