@@ -1,4 +1,6 @@
 ﻿using MainComponents;
+using System.Collections;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace RaspberryPiBrain
 {
@@ -12,7 +14,7 @@ namespace RaspberryPiBrain
                 ApplicationSettings.CheckRefresh();
 
                 Logger.Write("Run RaspberryPiBrain v0.01");
-                /* Główny program na RaspberryPi do komunikacji pomiędzy serwerem a SmartHome */
+                /* Główny program na RaspberryPi do komunikacji pomiędzy serwerem a SmartHome 
 
                 Console.WriteLine("Running on: " + Directory.GetCurrentDirectory());
                 Console.WriteLine("Dostępne porty COM:");
@@ -23,17 +25,24 @@ namespace RaspberryPiBrain
                     {
                         Console.WriteLine(port);
                     }
-                }
+                }*/
 
                 using NetworkManagement networkManagement = new();
                 
-                using SerialManagement serialManagement = new(ApplicationSettings.SerialPort);
+                byte[] czujnikZmierzchuBuffer = [];
+                using SerialManagement gniazdkaSerial = new(ApplicationSettings.GniazdkaSerial,
+                    data => { if (data != null) czujnikZmierzchuBuffer = data; });
+
+                byte[] stanOswietleniaBuffer = [];
+                using SerialManagement oswietlenieSerial = new(ApplicationSettings.OswietlenieSerial,
+                    data => { if (data != null) stanOswietleniaBuffer = data; });
 
                 // TODO Disable log Serial
 
-                // Zmienne do pamiętania poprzedniego stanu
+                // Zmienne do pamiętania poprzedniego1 stanu
                 bool[] networkState = new bool[8], arduinoState = new bool[8];
                 byte lastDataSend = 0x00;
+                byte[] stanOswietleniaStanZapamietany = [];
 
                 try
                 {
@@ -41,6 +50,8 @@ namespace RaspberryPiBrain
 
                     while (MainLoop)
                     {
+                        oswietlenieSerial.SendData(MyHouseManagement.GetStateLight);
+
                         Thread.Sleep(ApplicationSettings.LoopDelay);
 
                         if (networkManagement.NetworkModel != null)
@@ -69,16 +80,22 @@ namespace RaspberryPiBrain
 
                         byte data = 0x30; // <- Początek licz w ASCII
                         if (ChoinkaLampkaState) data += 0b00000001;
-                        if ((DateTime.Now.Hour >= 22) || (DateTime.Now.Hour <= 6)) data += 0b00000010;
+                        if ((DateTime.Now.Hour >= 22) || (DateTime.Now.Hour < 6)) data += 0b00000010;
 
                         if ((lastDataSend != data) || first)
                         {
-                            serialManagement.SendData([data, 0x0D, 0x0A]);
+                            gniazdkaSerial.SendData([data, 0x0D, 0x0A]);
                             lastDataSend = data;
                         }
 
 
                         first = false;
+                        if(!HF.TheSameArray(stanOswietleniaBuffer, stanOswietleniaStanZapamietany))
+                        {
+                            stanOswietleniaStanZapamietany = stanOswietleniaBuffer;
+                            Logger.Write("Stan Oświetlenia: " + 
+                                string.Join(", ", stanOswietleniaStanZapamietany.Select(b => b.ToString("X2"))));
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -87,7 +104,8 @@ namespace RaspberryPiBrain
                 }
                 finally
                 {
-                    serialManagement.ClosePort();
+                    gniazdkaSerial.ClosePort();
+                    oswietlenieSerial.ClosePort();
                     NetworkManagement.RunLoop = false;
                 }
             }

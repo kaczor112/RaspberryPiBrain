@@ -76,10 +76,16 @@ namespace MainComponents
             set => SetSetting(nameof(Debug), value);
         }
 
-        public static string SerialPort
+        public static string GniazdkaSerial
         {
-            get => GetSetting<string>(nameof(SerialPort));
-            set => SetSetting(nameof(SerialPort), value);
+            get => GetSetting<string>(nameof(GniazdkaSerial));
+            set => SetSetting(nameof(GniazdkaSerial), value);
+        }
+
+        public static string OswietlenieSerial
+        {
+            get => GetSetting<string>(nameof(OswietlenieSerial));
+            set => SetSetting(nameof(OswietlenieSerial), value);
         }
 
         public static int LoopDelay
