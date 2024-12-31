@@ -30,11 +30,11 @@ namespace RaspberryPiBrain
                 using NetworkManagement networkManagement = new();
                 
                 byte[] czujnikZmierzchuBuffer = [];
-                using SerialManagement gniazdkaSerial = new("/dev/ttyACM0",
+                using SerialManagement gniazdkaSerial = new(ApplicationSettings.GniazdkaSerial,
                     data => { if (data != null) czujnikZmierzchuBuffer = data; });
 
                 byte[] stanOswietleniaBuffer = [];
-                using SerialManagement oswietlenieSerial = new("/dev/ttyUSB0",
+                using SerialManagement oswietlenieSerial = new(ApplicationSettings.OswietlenieSerial,
                     data => { if (data != null) stanOswietleniaBuffer = data; });
 
                 // TODO Disable log Serial

@@ -26,8 +26,8 @@ namespace Model
                 {
                     RefreshSettings = true,
                     Debug = true,
-                    GniazdkaSerial = "COM1",
-                    OswietlenieSerial = "COM1",
+                    GniazdkaSerial = "/dev/ttyACM0",
+                    OswietlenieSerial = "/dev/ttyUSB0",
                     LoopDelay = 500,
                     KeyID = "MojeID",
                     MyWebsite = @"https://example.com/"

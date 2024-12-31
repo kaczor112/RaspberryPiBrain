@@ -62,7 +62,7 @@ namespace MainComponents
         public static TModel? LoadModelFromFile<TModel>(string filePath)
         {
             // Plik nie istnieje, zwróć null
-            if (!File.Exists(Directory.GetCurrentDirectory() + filePath)) return default;
+            if (!File.Exists(Directory.GetCurrentDirectory() + "\\" + filePath)) return default;
 
             return JsonSerializer.Deserialize<TModel>(File.ReadAllText(Directory.GetCurrentDirectory() + "\\" + filePath));
         }
