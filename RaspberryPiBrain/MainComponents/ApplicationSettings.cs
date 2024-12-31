@@ -12,7 +12,7 @@ namespace MainComponents
     public static class ApplicationSettings
     {
         public const string DateFormat = "yyyy.MM.dd HH:mm:ss.fff";
-        private const string SettingsFileName = "settingsRaspberryPiBrain.json";
+        private const string SettingsFileName = "settingsRPIBrain.json";
 
         #region OrganizationalFunctions
 #pragma warning disable CS8618 // Pole niedopuszczające wartości null musi zawierać wartość inną niż null podczas kończenia działania konstruktora. Rozważ zadeklarowanie pola jako dopuszczającego wartość null.
