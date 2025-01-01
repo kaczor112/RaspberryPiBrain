@@ -57,10 +57,15 @@ namespace RaspberryPiBrain
 
                     bool MainLoop = true; byte lastDataSend = 0x00;
 
+                    Logger.Write("Uruchamiam pętle główną");
+
                     while (MainLoop)
                     {
-                        gniazdkaSerial.SendData(MyHouseManagement.GetStateArduino);
-                        oswietlenieSerial.SendData(MyHouseManagement.GetStateArduino);
+                        if (czujnikZmierzchuBuffer == null || czujnikZmierzchuBuffer?.Length == 0)
+                            gniazdkaSerial.SendData(MyHouseManagement.GetStateArduino);
+
+                        if(stanOswietleniaBuffer == null || stanOswietleniaBuffer?.Length == 0) 
+                            oswietlenieSerial.SendData(MyHouseManagement.GetStateArduino);
 
                         Thread.Sleep(ApplicationSettings.LoopDelay);
 
@@ -76,6 +81,12 @@ namespace RaspberryPiBrain
                         }
 
                         myHouse.HeartBeat();
+
+                        if(myHouse.FrameToSendArduinoLight != null)
+                        {
+                            oswietlenieSerial.SendData(myHouse.FrameToSendArduinoLight);
+                            myHouse.FrameToSendArduinoLight = null;
+                        }
 
                         byte data = 0x30; // <- Początek licz w ASCII
                         //if (ChoinkaLampkaState) data += 0b00000001;
