@@ -61,6 +61,8 @@ namespace MainComponents
 
         public static TModel? LoadModelFromFile<TModel>(string filePath)
         {
+            // TODO kiedy ktoś inny coś zapisze w pliku na chwile będzie exception
+
             // Plik nie istnieje, zwróć null
             if (!File.Exists(Directory.GetCurrentDirectory() + "\\" + filePath)) return default;
 

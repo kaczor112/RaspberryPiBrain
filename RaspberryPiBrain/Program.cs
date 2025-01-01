@@ -6,7 +6,6 @@ namespace RaspberryPiBrain
 {
     public class Program
     {
-        public static string[] domNames = ["GoscinnyDuze", "GoscinnyMale", "Kuchnia", "Przedpokoj", "WC", "Sypialnia", "Aux", "ChoinkaLampka"];
         static void Main(string[] args)
         {
             try
@@ -28,6 +27,8 @@ namespace RaspberryPiBrain
                 }*/
 
                 using NetworkManagement networkManagement = new();
+
+                MyHouseManagement myHouse = new();
                 
                 byte[] czujnikZmierzchuBuffer = [];
                 using SerialManagement gniazdkaSerial = new(ApplicationSettings.GniazdkaSerial,
@@ -39,63 +40,61 @@ namespace RaspberryPiBrain
 
                 // TODO Disable log Serial
 
-                // Zmienne do pamiętania poprzedniego1 stanu
-                bool[] networkState = new bool[8], arduinoState = new bool[8];
-                byte lastDataSend = 0x00;
-                byte[] stanOswietleniaStanZapamietany = [];
-
                 try
                 {
-                    bool MainLoop = true, first  = true, ChoinkaLampkaState = false;
+                    Logger.Write("Uruchamiam inicjowanie programu");
+
+                    oswietlenieSerial.SendData(MyHouseManagement.GetStateArduino);
+
+                    Thread.Sleep(ApplicationSettings.LoopDelay);
+
+                    if (stanOswietleniaBuffer?.Length > 0)
+                    {
+                        myHouse.SetStateArduino(stanOswietleniaBuffer);
+                        myHouse.InitFromArduino();
+                        stanOswietleniaBuffer = null;
+                    }
+
+                    bool MainLoop = true; byte lastDataSend = 0x00;
 
                     while (MainLoop)
                     {
-                        oswietlenieSerial.SendData(MyHouseManagement.GetStateLight);
+                        gniazdkaSerial.SendData(MyHouseManagement.GetStateArduino);
+                        oswietlenieSerial.SendData(MyHouseManagement.GetStateArduino);
 
                         Thread.Sleep(ApplicationSettings.LoopDelay);
 
-                        if (networkManagement.NetworkModel != null)
+                        if (stanOswietleniaBuffer?.Length > 0)
                         {
-                            for (int i = 0; i < domNames.Length; i++)
-                            {
-                                foreach (var item in networkManagement.NetworkModel)
-                                {
-                                    if(domNames[i] == item.Param)
-                                    {
-                                        bool newState = bool.Parse(item.Value);
-                                        if (newState != networkState[i] || first)
-                                        {
-                                            Logger.Write(domNames[i] + ": " + newState);
-                                            networkState[i] = newState;
-                                        }
-
-                                        if("ChoinkaLampka" == domNames[i])
-                                        {
-                                            ChoinkaLampkaState = newState;
-                                        }
-                                    }
-                                }
-                            }
+                            myHouse.SetStateArduino(stanOswietleniaBuffer);
+                            stanOswietleniaBuffer = null;
                         }
 
+                        if (networkManagement.NetworkModel != null)
+                        {
+                            myHouse.SetStateHttp(networkManagement.NetworkModel);
+                        }
+
+                        myHouse.HeartBeat();
+
                         byte data = 0x30; // <- Początek licz w ASCII
-                        if (ChoinkaLampkaState) data += 0b00000001;
+                        //if (ChoinkaLampkaState) data += 0b00000001;
                         if ((DateTime.Now.Hour >= 22) || (DateTime.Now.Hour < 6)) data += 0b00000010;
 
-                        if ((lastDataSend != data) || first)
+                        if ((lastDataSend != data))
                         {
                             gniazdkaSerial.SendData([data, 0x0D, 0x0A]);
                             lastDataSend = data;
                         }
 
 
-                        first = false;
-                        if(!HF.TheSameArray(stanOswietleniaBuffer, stanOswietleniaStanZapamietany))
-                        {
-                            stanOswietleniaStanZapamietany = stanOswietleniaBuffer;
-                            Logger.Write("Stan Oświetlenia: " + 
-                                string.Join(", ", stanOswietleniaStanZapamietany.Select(b => b.ToString("X2"))));
-                        }
+                        //first = false;
+                        //if(!HF.TheSameArray(stanOswietleniaBuffer, stanOswietleniaStanZapamietany))
+                        //{
+                        //    stanOswietleniaStanZapamietany = stanOswietleniaBuffer;
+                        //    Logger.Write("Stan Oświetlenia: " + 
+                        //        string.Join(", ", stanOswietleniaStanZapamietany.Select(b => b.ToString("X2"))));
+                        //}
                     }
                 }
                 catch (Exception ex)

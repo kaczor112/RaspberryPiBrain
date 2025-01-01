@@ -15,6 +15,7 @@ namespace RaspberryPiBrain
     {
         public List<DomModel> NetworkModel { get; private set; }
 
+        private int counterError { get; set; } = 0;
         private async Task LoadValuesOfDom()
         {
             try
@@ -41,7 +42,8 @@ namespace RaspberryPiBrain
                 }
                 else
                 {
-                    Logger.Write("Error: Nie można pobrać pliku JSON.");
+                    if(counterError == 0) Logger.Write("Error: Nie można pobrać pliku JSON[Adres:" + ApplicationSettings.MyWebsite + "].");
+                    if(counterError++ > 500) counterError = 0;
                 }
             }
             catch (Exception ex)
@@ -51,7 +53,7 @@ namespace RaspberryPiBrain
         }
 
 
-        private async Task SendRequest(string param, bool value)
+        public static async Task SendRequest(string param, bool value)
         {
             try
             {
