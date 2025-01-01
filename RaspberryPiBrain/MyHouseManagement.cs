@@ -55,7 +55,6 @@ namespace RaspberryPiBrain
 
             if (StateLightArduino != CurrentLightState)
             {
-                StateLightHttp = StateLightArduino;
                 CurrentLightState = StateLightArduino;
 
                 SendStateToHttp(StateLightArduino);
@@ -64,7 +63,6 @@ namespace RaspberryPiBrain
             } 
             else if (StateLightHttp != CurrentLightState)
             {
-                StateLightArduino = StateLightHttp;
                 CurrentLightState = StateLightHttp;
 
                 SendStateToArduino(StateLightHttp);
@@ -146,6 +144,8 @@ namespace RaspberryPiBrain
                     _ = NetworkManagement.SendRequest(domNames[i], newState);
                 }
             }
+
+            StateLightHttp = newStateHttp;
         }
 
         public byte[] FrameToSendArduinoLight {  get; set; }
