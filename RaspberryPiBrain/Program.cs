@@ -36,7 +36,7 @@ namespace RaspberryPiBrain
 
                 byte[] stanOswietleniaBuffer = [];
                 using SerialManagement oswietlenieSerial = new(ApplicationSettings.OswietlenieSerial,
-                    data => { if (data != null) stanOswietleniaBuffer = data; });
+                    data => { if (data?.Length < 10) stanOswietleniaBuffer = data; });
 
                 // TODO Disable log Serial
 
@@ -89,10 +89,12 @@ namespace RaspberryPiBrain
                             if(stanOswietleniaBuffer.Length > 10)   // To potwierdzeni odebrania zArduino poprzedniego rozkazu
                             {
                                 stanOswietleniaBuffer = null;
-                                continue;
                             }
-                            myHouse.SetStateArduino(stanOswietleniaBuffer);
-                            stanOswietleniaBuffer = null;
+                            else
+                            {
+                                myHouse.SetStateArduino(stanOswietleniaBuffer);
+                                stanOswietleniaBuffer = null;
+                            }
                         }
 
                         if (networkManagement.NetworkModel != null)
@@ -107,6 +109,7 @@ namespace RaspberryPiBrain
                             oswietlenieSerial.SendData(myHouse.FrameToSendArduinoLight);
                             myHouse.FrameToSendArduinoLight = null;
                             sendOswietlenie = true;
+                            Thread.Sleep(ApplicationSettings.LoopDelay);
                         }
 
                         byte data = 0x30; // <- Początek licz w ASCII
