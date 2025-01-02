@@ -173,5 +173,22 @@ namespace RaspberryPiBrain
 
         public bool ChoinkaLampkaState
             => (CurrentLightState & 0x80) > 0;
+        public bool GoscinnyDuzeLampkaState
+            => (CurrentLightState & 0x01) > 0;
+
+        public bool CzujnikZmierzchu {  get; private set; }
+        public void SetCzujnikZmierzchu(byte[] czujnikZmierzchuBytes)
+        {
+            if (czujnikZmierzchuBytes?.Length > 0)
+            {
+                string tempCzujnikZmierzchu = string.Concat(Array.ConvertAll(czujnikZmierzchuBytes, b => (char)b));
+                tempCzujnikZmierzchu = tempCzujnikZmierzchu.Trim();
+
+                //Logger.Write("Czujnik zmierzchu: " + tempCzujnikZmierzchu + " Length: " + czujnikZmierzchuBuffer.Length);
+
+                if (tempCzujnikZmierzchu == "RUN") CzujnikZmierzchu = true;
+                else if(tempCzujnikZmierzchu == "OFF") CzujnikZmierzchu = false;
+            }
+        }
     }
 }

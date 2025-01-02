@@ -75,7 +75,7 @@ namespace RaspberryPiBrain
 
                         if(stanOswietleniaBuffer == null || stanOswietleniaBuffer?.Length == 0)
                         {
-                            if (((DateTime.Now.Second / 10) != (oswietlenieTime.Second / 10)) || sendOswietlenie)  // Odświeźam raz na 10 sek
+                            if (((DateTime.Now.Second) != (oswietlenieTime.Second)) || sendOswietlenie)  // Odświeźam raz na 10 sek
                             {
                                 oswietlenieSerial.SendData(MyHouseManagement.GetStateArduino);
                                 oswietlenieTime = DateTime.Now;
@@ -97,10 +97,12 @@ namespace RaspberryPiBrain
                         
                         if (czujnikZmierzchuBuffer?.Length > 0)
                         {
-                            string tempCzujnikZmierzchu = string.Concat(Array.ConvertAll(czujnikZmierzchuBuffer, b => (char)b));
-                            tempCzujnikZmierzchu = tempCzujnikZmierzchu.Trim();
+                            //string tempCzujnikZmierzchu = string.Concat(Array.ConvertAll(czujnikZmierzchuBuffer, b => (char)b));
+                            //tempCzujnikZmierzchu = tempCzujnikZmierzchu.Trim();
 
-                            Logger.Write("Czujnik zmierzchu: " + tempCzujnikZmierzchu + " Length: " + czujnikZmierzchuBuffer.Length);
+                            //Logger.Write("Czujnik zmierzchu: " + tempCzujnikZmierzchu + " Length: " + czujnikZmierzchuBuffer.Length);
+
+                            myHouse.SetCzujnikZmierzchu(czujnikZmierzchuBuffer);
 
                             czujnikZmierzchuBuffer = null;
                         }
@@ -122,7 +124,7 @@ namespace RaspberryPiBrain
 
                         byte data = 0x30; // <- Początek licz w ASCII
                         if (myHouse.ChoinkaLampkaState) data += 0b00000001;
-                        if ((DateTime.Now.Hour >= 22) || (DateTime.Now.Hour < 6)) data += 0b00000010;
+                        if (((DateTime.Now.Hour >= 22) || (DateTime.Now.Hour < 6)) && ((myHouse.CzujnikZmierzchu) && (!myHouse.GoscinnyDuzeLampkaState))) data += 0b00000010;
 
                         if ((lastDataSend != data))
                         {
