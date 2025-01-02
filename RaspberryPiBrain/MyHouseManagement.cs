@@ -94,7 +94,7 @@ namespace RaspberryPiBrain
                     if (ApplicationSettings.Debug && (tempStateLightArduino != StateLightArduino))
                     {
                         StateLightArduino = tempStateLightArduino;
-                        Logger.Write("Obecny stan oświetlenia ARD: 0b" + Convert.ToString(StateLightArduino, 2));
+                        Logger.Write("Obecny stan oświetlenia ARD: 0b" + Convert.ToString(result, 2) + " state: 0b" + Convert.ToString(StateLightArduino, 2));
                     }
                 }
             }

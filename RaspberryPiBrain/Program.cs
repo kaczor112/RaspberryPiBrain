@@ -40,6 +40,8 @@ namespace RaspberryPiBrain
 
                 // TODO Disable log Serial
 
+                DateTime gniazdkaTime = DateTime.Now, oswietlenieTime = DateTime.Now;
+
                 try
                 {
                     Logger.Write("Uruchamiam inicjowanie programu");
@@ -62,10 +64,21 @@ namespace RaspberryPiBrain
                     while (MainLoop)
                     {
                         if (czujnikZmierzchuBuffer == null || czujnikZmierzchuBuffer?.Length == 0)
-                            gniazdkaSerial.SendData(MyHouseManagement.GetStateArduino);
+                        {
+                            if(DateTime.Now.Minute != gniazdkaTime.Minute)  // Odświeźam raz na minute
+                            {
+                                gniazdkaSerial.SendData(MyHouseManagement.GetStateArduino);
+                                gniazdkaTime = DateTime.Now;
+                            }
+                        }
 
-                        if(stanOswietleniaBuffer == null || stanOswietleniaBuffer?.Length == 0) 
-                            oswietlenieSerial.SendData(MyHouseManagement.GetStateArduino);
+                        if(stanOswietleniaBuffer == null || stanOswietleniaBuffer?.Length == 0)
+                        {
+                            if ((DateTime.Now.Second / 10) != (gniazdkaTime.Second / 10))  // Odświeźam raz na 10 sek
+                            {
+                                oswietlenieSerial.SendData(MyHouseManagement.GetStateArduino);
+                            }
+                        }
 
                         Thread.Sleep(ApplicationSettings.LoopDelay);
 
