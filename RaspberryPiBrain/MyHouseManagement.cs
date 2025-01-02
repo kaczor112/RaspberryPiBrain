@@ -164,9 +164,13 @@ namespace RaspberryPiBrain
             StateLightHttp = newStateHttp;
         }
 
-        public byte[] FrameToSendArduinoLight {  get; set; }
+        public string FrameToSendArduinoLight {  get; set; }
         private void SendStateToArduino(byte newStateArduino)
         {
+            FrameToSendArduinoLight = newStateArduino + "\r\n";
+            Logger.Write("SendStateToArduino: " + Convert.ToString(newStateArduino, 2).PadRight(8, '0'));
+            return;
+
             // Aktualizuje stan ADR na podstawie http
             byte negStateArduino = (byte)~newStateArduino;
             string numberString = negStateArduino.ToString();
