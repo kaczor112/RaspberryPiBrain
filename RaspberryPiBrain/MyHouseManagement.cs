@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace RaspberryPiBrain
 {
@@ -105,7 +104,7 @@ namespace RaspberryPiBrain
                 if (int.TryParse(numberString, out int result))
                 {
                     byte tempStateLightArduino = (byte)~(result & 0xFF); // 0xFF bo tylko to jest oświetleniem pozostała liczba to stan przełączników
-                    if (ApplicationSettings.Debug && (tempStateLightArduino != StateLightArduino))
+                    if (tempStateLightArduino != StateLightArduino)
                     {
                         StateLightArduino = tempStateLightArduino;
                         //Logger.Write("Obecny stan oświetlenia ARD: 0b" + Convert.ToString(result, 2) + " state: 0b" + Convert.ToString(StateLightArduino, 2));
