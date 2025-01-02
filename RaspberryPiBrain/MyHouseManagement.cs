@@ -169,24 +169,24 @@ namespace RaspberryPiBrain
         {
             FrameToSendArduinoLight = newStateArduino + "\r\n";
             Logger.Write("SendStateToArduino: " + Convert.ToString(newStateArduino, 2).PadRight(8, '0'));
-            return;
+            //return;
 
-            // Aktualizuje stan ADR na podstawie http
-            byte negStateArduino = (byte)~newStateArduino;
-            string numberString = negStateArduino.ToString();
-            byte[] byteArray = Array.ConvertAll(numberString.ToCharArray(), c => (byte)c);
-            Array.Reverse(byteArray);
+            //// Aktualizuje stan ADR na podstawie http
+            //byte negStateArduino = (byte)~newStateArduino;
+            //string numberString = negStateArduino.ToString();
+            //byte[] byteArray = Array.ConvertAll(numberString.ToCharArray(), c => (byte)c);
+            //Array.Reverse(byteArray);
 
-            FrameToSendArduinoLight = [..byteArray, 0x0D, 0x0A];
+            //FrameToSendArduinoLight = [..byteArray, 0x0D, 0x0A];
 
-            string numberString2 = string.Concat(Array.ConvertAll(byteArray, b => (char)b));
+            //string numberString2 = string.Concat(Array.ConvertAll(byteArray, b => (char)b));
 
-            // Usunięcie potencjalnych znaków nieliczbowych (np. spacji lub innych symboli)
-            numberString2 = string.Concat(numberString2.Where(char.IsDigit));
+            //// Usunięcie potencjalnych znaków nieliczbowych (np. spacji lub innych symboli)
+            //numberString2 = string.Concat(numberString2.Where(char.IsDigit));
 
-            // Konwersja na int
-            if (int.TryParse(numberString2, out int result))
-                Logger.Write("SendStateToArduino: 0b" + Convert.ToString(result, 2).PadRight(8, '0'));
+            //// Konwersja na int
+            //if (int.TryParse(numberString2, out int result))
+            //    Logger.Write("SendStateToArduino: 0b" + Convert.ToString(result, 2).PadRight(8, '0'));
         }
     }
 }
