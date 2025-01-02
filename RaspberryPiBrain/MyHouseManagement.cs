@@ -42,35 +42,54 @@ namespace RaspberryPiBrain
             CurrentLightState = StateLightArduino;
 
             SendStateToHttp(StateLightArduino);
+
+            orderUpdate = 1;
         }
 
-        private int counterUpdate { get; set; } = 0;
+        private int orderUpdate { get; set; } = 0;  // Zmienna dzięki której czekam na ustawienie właściwego stanu
         public void HeartBeat()
         {
             // Zasadnicza funkcja sprawdzająca różnice i wymuszająca stany.
 
-            // counterUpdate bo myślę że natychmiastowe sprawdzanie po wysłaniu może być za szybko
+            // Blokuje aż do pełnego zaktualizowania
 
-            if (counterUpdate++ < 10) return;
+            if (orderUpdate == 1)
+            {
+                if (StateLightHttp != CurrentLightState)
+                {
+                    Logger.Write("Block upd http - current: 0b" + Convert.ToString(StateLightArduino, 2) + " new: 0b" + Convert.ToString(StateLightHttp, 2));
+                    SendStateToHttp(StateLightArduino);
+                } else orderUpdate = 0;
+            }
+
+            if (orderUpdate == 2)
+            {
+                if (StateLightArduino != CurrentLightState)
+                {
+                    Logger.Write("Block upd Ardu - current: 0b" + Convert.ToString(StateLightArduino, 2) + " new: 0b" + Convert.ToString(StateLightHttp, 2));
+                    SendStateToArduino(CurrentLightState);
+                }
+                else orderUpdate = 0;
+            }
 
             if (StateLightArduino != CurrentLightState)
             {
+                Logger.Write("Change Ardu - current: 0b" + Convert.ToString(StateLightArduino, 2) + " new: 0b" + Convert.ToString(StateLightHttp, 2));
                 CurrentLightState = StateLightArduino;
 
                 SendStateToHttp(StateLightArduino);
 
-                counterUpdate = 0;
+                orderUpdate = 1;    // Aktualizuje http na mocy Arduino
             } 
             else if (StateLightHttp != CurrentLightState)
             {
+                Logger.Write("Change http - current: 0b" + Convert.ToString(CurrentLightState, 2) + " new: 0b" + Convert.ToString(StateLightHttp, 2));
                 CurrentLightState = StateLightHttp;
 
                 SendStateToArduino(StateLightHttp);
 
-                counterUpdate = 0;
+                orderUpdate = 2;    // Aktualizuje Arduino na mocy http
             }
-
-            if(counterUpdate > 100) counterUpdate = 100; // Stan oczekiwania
         }
 
         private byte StateLightArduino { get; set; }
@@ -141,7 +160,7 @@ namespace RaspberryPiBrain
                 bool newState = ((newStateHttp >> i) & 1) == 1;
                 if (newState != (((StateLightHttp >> i) & 1) == 1))
                 {
-                    _ = NetworkManagement.SendRequest(domNames[i], newState);
+                    NetworkManagement.SendRequest(domNames[i], newState).Wait();
                 }
             }
 

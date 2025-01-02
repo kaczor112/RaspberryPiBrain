@@ -74,9 +74,10 @@ namespace RaspberryPiBrain
 
                         if(stanOswietleniaBuffer == null || stanOswietleniaBuffer?.Length == 0)
                         {
-                            if ((DateTime.Now.Second / 10) != (gniazdkaTime.Second / 10))  // Odświeźam raz na 10 sek
+                            if ((DateTime.Now.Second / 10) != (oswietlenieTime.Second / 10))  // Odświeźam raz na 10 sek
                             {
                                 oswietlenieSerial.SendData(MyHouseManagement.GetStateArduino);
+                                oswietlenieTime = DateTime.Now;
                             }
                         }
 
