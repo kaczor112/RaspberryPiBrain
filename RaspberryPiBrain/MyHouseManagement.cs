@@ -38,7 +38,6 @@ namespace RaspberryPiBrain
         public void InitFromArduino()
         {
             // Inicjowanie Początkowe na podstawie Arduino
-            StateLightHttp = StateLightArduino;
             CurrentLightState = StateLightArduino;
 
             SendStateToHttp(StateLightArduino);
@@ -172,6 +171,7 @@ namespace RaspberryPiBrain
             byte negStateArduino = (byte)~newStateArduino;
             string numberString = negStateArduino.ToString();
             byte[] byteArray = Array.ConvertAll(numberString.ToCharArray(), c => (byte)c);
+            Array.Reverse(byteArray);
 
             FrameToSendArduinoLight = [..byteArray, 0x0D, 0x0A];
 
