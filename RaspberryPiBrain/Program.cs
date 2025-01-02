@@ -98,7 +98,7 @@ namespace RaspberryPiBrain
                         if (czujnikZmierzchuBuffer?.Length > 0)
                         {
                             string tempCzujnikZmierzchu = string.Concat(Array.ConvertAll(czujnikZmierzchuBuffer, b => (char)b));
-                            tempCzujnikZmierzchu = string.Concat(tempCzujnikZmierzchu.Where(char.IsDigit));
+                            tempCzujnikZmierzchu = tempCzujnikZmierzchu.Trim();
 
                             Logger.Write("Czujnik zmierzchu: " + tempCzujnikZmierzchu + " Length: " + czujnikZmierzchuBuffer.Length);
 

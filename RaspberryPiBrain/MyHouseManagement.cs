@@ -172,6 +172,6 @@ namespace RaspberryPiBrain
         }
 
         public bool ChoinkaLampkaState
-            => (CurrentLightState & 0x40) > 0;
+            => (CurrentLightState & 0x80) > 0;
     }
 }
