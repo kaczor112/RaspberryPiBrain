@@ -57,7 +57,7 @@ namespace RaspberryPiBrain
                         stanOswietleniaBuffer = null;
                     }
 
-                    bool MainLoop = true; byte lastDataSend = 0x00;
+                    bool MainLoop = true; byte lastDataSend = 0x00; bool sendOswietlenie = false;
 
                     Logger.Write("Uruchamiam pętle główną");
 
@@ -74,10 +74,11 @@ namespace RaspberryPiBrain
 
                         if(stanOswietleniaBuffer == null || stanOswietleniaBuffer?.Length == 0)
                         {
-                            if ((DateTime.Now.Second / 10) != (oswietlenieTime.Second / 10))  // Odświeźam raz na 10 sek
+                            if (((DateTime.Now.Second / 10) != (oswietlenieTime.Second / 10)) || sendOswietlenie)  // Odświeźam raz na 10 sek
                             {
                                 oswietlenieSerial.SendData(MyHouseManagement.GetStateArduino);
                                 oswietlenieTime = DateTime.Now;
+                                sendOswietlenie = false;
                             }
                         }
 
@@ -85,6 +86,11 @@ namespace RaspberryPiBrain
 
                         if (stanOswietleniaBuffer?.Length > 0)
                         {
+                            if(stanOswietleniaBuffer.Length > 10)   // To potwierdzeni odebrania zArduino poprzedniego rozkazu
+                            {
+                                stanOswietleniaBuffer = null;
+                                continue;
+                            }
                             myHouse.SetStateArduino(stanOswietleniaBuffer);
                             stanOswietleniaBuffer = null;
                         }
@@ -100,6 +106,7 @@ namespace RaspberryPiBrain
                         {
                             oswietlenieSerial.SendData(myHouse.FrameToSendArduinoLight);
                             myHouse.FrameToSendArduinoLight = null;
+                            sendOswietlenie = true;
                         }
 
                         byte data = 0x30; // <- Początek licz w ASCII
