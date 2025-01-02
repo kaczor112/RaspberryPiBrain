@@ -57,24 +57,22 @@ namespace RaspberryPiBrain
             {
                 if (StateLightHttp != CurrentLightState)
                 {
-                    Logger.Write("Block upd http - current: 0b" + Convert.ToString(StateLightArduino, 2).PadRight(8, '0') + " new: 0b" + Convert.ToString(StateLightHttp, 2).PadRight(8, '0'));
-                    SendStateToHttp(StateLightArduino);
+                    Logger.Write("Block upd http - current: 0b" + Convert.ToString(CurrentLightState, 2).PadRight(8, '0') + " old: 0b" + Convert.ToString(StateLightHttp, 2).PadRight(8, '0'));
+                    SendStateToHttp(CurrentLightState);
                 } else orderUpdate = 0;
             }
-
-            if (orderUpdate == 2)
+            else if (orderUpdate == 2)
             {
                 if (StateLightArduino != CurrentLightState)
                 {
-                    Logger.Write("Block upd Ardu - current: 0b" + Convert.ToString(StateLightArduino, 2).PadRight(8,'0') + " new: 0b" + Convert.ToString(StateLightHttp, 2).PadRight(8, '0'));
+                    Logger.Write("Block upd Ardu - current: 0b" + Convert.ToString(CurrentLightState, 2).PadRight(8,'0') + " old: 0b" + Convert.ToString(StateLightArduino, 2).PadRight(8, '0'));
                     SendStateToArduino(CurrentLightState);
                 }
                 else orderUpdate = 0;
             }
-
-            if (StateLightArduino != CurrentLightState)
+            else if (StateLightArduino != CurrentLightState)
             {
-                Logger.Write("Change Ardu - current: 0b" + Convert.ToString(StateLightArduino, 2).PadRight(8, '0') + " new: 0b" + Convert.ToString(StateLightHttp, 2).PadRight(8, '0'));
+                Logger.Write("Change Ardu - current: 0b" + Convert.ToString(CurrentLightState, 2).PadRight(8, '0') + " new: 0b" + Convert.ToString(StateLightArduino, 2).PadRight(8, '0'));
                 CurrentLightState = StateLightArduino;
 
                 SendStateToHttp(StateLightArduino);
