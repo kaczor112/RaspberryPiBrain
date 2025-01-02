@@ -90,11 +90,11 @@ namespace RaspberryPiBrain
                 // Konwersja na int
                 if (int.TryParse(numberString, out int result))
                 {
-                    byte tempStateLightArduino = (byte)(result & 0xFF); // 0xFF bo tylko to jest oświetleniem pozostała liczba to stan przełączników
+                    byte tempStateLightArduino = (byte)~(result & 0xFF); // 0xFF bo tylko to jest oświetleniem pozostała liczba to stan przełączników
                     if (ApplicationSettings.Debug && (tempStateLightArduino != StateLightArduino))
                     {
                         StateLightArduino = tempStateLightArduino;
-                        Logger.Write("Obecny stan oświetlenia ARD: 0b" + Convert.ToString(result, 2) + " state: 0b" + Convert.ToString(StateLightArduino, 2));
+                        //Logger.Write("Obecny stan oświetlenia ARD: 0b" + Convert.ToString(result, 2) + " state: 0b" + Convert.ToString(StateLightArduino, 2));
                     }
                 }
             }
@@ -152,8 +152,8 @@ namespace RaspberryPiBrain
         private void SendStateToArduino(byte newStateArduino)
         {
             // Aktualizuje stan ADR na podstawie http
-
-            string numberString = newStateArduino.ToString();
+            byte negStateArduino = (byte)~newStateArduino;
+            string numberString = negStateArduino.ToString();
             byte[] byteArray = Array.ConvertAll(numberString.ToCharArray(), c => (byte)c);
 
 
