@@ -1,0 +1,7 @@
+﻿[*.cs]
+
+# CS8600: Konwertowanie literału null lub możliwej wartości null na nienullowalny typ.
+dotnet_diagnostic.CS8600.severity = none
+
+# CS8625: Nie można przekonwertować literału o wartości null na nienullowalny typ referencyjny.
+dotnet_diagnostic.CS8625.severity = none

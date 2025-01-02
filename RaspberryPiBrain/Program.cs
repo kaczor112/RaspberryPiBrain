@@ -6,6 +6,7 @@ namespace RaspberryPiBrain
 {
     public class Program
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Usuń nieużywany parametr", Justification = "<Oczekujące>")]
         static void Main(string[] args)
         {
             try
@@ -44,11 +45,11 @@ namespace RaspberryPiBrain
 
                 try
                 {
-                    Logger.Write("Uruchamiam inicjowanie programu");
+                    //Logger.Write("Uruchamiam inicjowanie programu");
 
                     oswietlenieSerial.SendData(MyHouseManagement.GetStateArduino);
 
-                    Thread.Sleep(ApplicationSettings.LoopDelay);
+                    Thread.Sleep(ApplicationSettings.LoopDelay * 2);
 
                     if (stanOswietleniaBuffer?.Length > 0)
                     {
@@ -86,15 +87,22 @@ namespace RaspberryPiBrain
 
                         if (stanOswietleniaBuffer?.Length > 0)
                         {
-                            if(stanOswietleniaBuffer.Length > 10)   // To potwierdzeni odebrania zArduino poprzedniego rozkazu
-                            {
-                                stanOswietleniaBuffer = null;
-                            }
-                            else
+                            if (stanOswietleniaBuffer.Length < 10)   // To potwierdzeni odebrania zArduino poprzedniego rozkazu
                             {
                                 myHouse.SetStateArduino(stanOswietleniaBuffer);
-                                stanOswietleniaBuffer = null;
                             }
+
+                            stanOswietleniaBuffer = null;
+                        }
+                        
+                        if (czujnikZmierzchuBuffer?.Length > 0)
+                        {
+                            string tempCzujnikZmierzchu = string.Concat(Array.ConvertAll(czujnikZmierzchuBuffer, b => (char)b));
+                            tempCzujnikZmierzchu = string.Concat(tempCzujnikZmierzchu.Where(char.IsDigit));
+
+                            Logger.Write("Czujnik zmierzchu: " + tempCzujnikZmierzchu + " Length: " + czujnikZmierzchuBuffer.Length);
+
+                            czujnikZmierzchuBuffer = null;
                         }
 
                         if (networkManagement.NetworkModel != null)
@@ -113,7 +121,7 @@ namespace RaspberryPiBrain
                         }
 
                         byte data = 0x30; // <- Początek licz w ASCII
-                        //if (ChoinkaLampkaState) data += 0b00000001;
+                        if (myHouse.ChoinkaLampkaState) data += 0b00000001;
                         if ((DateTime.Now.Hour >= 22) || (DateTime.Now.Hour < 6)) data += 0b00000010;
 
                         if ((lastDataSend != data))
@@ -121,15 +129,6 @@ namespace RaspberryPiBrain
                             gniazdkaSerial.SendData([data, 0x0D, 0x0A]);
                             lastDataSend = data;
                         }
-
-
-                        //first = false;
-                        //if(!HF.TheSameArray(stanOswietleniaBuffer, stanOswietleniaStanZapamietany))
-                        //{
-                        //    stanOswietleniaStanZapamietany = stanOswietleniaBuffer;
-                        //    Logger.Write("Stan Oświetlenia: " + 
-                        //        string.Join(", ", stanOswietleniaStanZapamietany.Select(b => b.ToString("X2"))));
-                        //}
                     }
                 }
                 catch (Exception ex)

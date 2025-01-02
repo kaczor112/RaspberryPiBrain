@@ -12,8 +12,6 @@ namespace RaspberryPiBrain
 {
     public class MyHouseManagement
     {
-        private byte currentLightState { get; set; } = 0x00;
-
         public static byte[] GetStateArduino
              => [0x47, 0x45, 0x54, 0x0D, 0x0A];  // GET + 0x0D 0x0A
 
@@ -42,50 +40,50 @@ namespace RaspberryPiBrain
 
             SendStateToHttp(StateLightArduino);
 
-            orderUpdate = 1;
+            OrderUpdate = 1;
         }
 
-        private int orderUpdate { get; set; } = 0;  // Zmienna dzięki której czekam na ustawienie właściwego stanu
+        private int OrderUpdate { get; set; } = 0;  // Zmienna dzięki której czekam na ustawienie właściwego stanu
         public void HeartBeat()
         {
             // Zasadnicza funkcja sprawdzająca różnice i wymuszająca stany.
 
             // Blokuje aż do pełnego zaktualizowania
 
-            if (orderUpdate == 1)
+            if (OrderUpdate == 1)
             {
                 if (StateLightHttp != CurrentLightState)
                 {
-                    Logger.Write("Block upd http - current: 0b" + Convert.ToString(CurrentLightState, 2).PadRight(8, '0') + " old: 0b" + Convert.ToString(StateLightHttp, 2).PadRight(8, '0'));
+                    if(ApplicationSettings.Debug) Logger.Write("Block upd http - current: 0b" + Convert.ToString(CurrentLightState, 2).PadLeft(8, '0') + " old: 0b" + Convert.ToString(StateLightHttp, 2).PadLeft(8, '0'));
                     SendStateToHttp(CurrentLightState);
-                } else orderUpdate = 0;
+                } else OrderUpdate = 0;
             }
-            else if (orderUpdate == 2)
+            else if (OrderUpdate == 2)
             {
                 if (StateLightArduino != CurrentLightState)
                 {
-                    Logger.Write("Block upd Ardu - current: 0b" + Convert.ToString(CurrentLightState, 2).PadRight(8,'0') + " old: 0b" + Convert.ToString(StateLightArduino, 2).PadRight(8, '0'));
+                    if (ApplicationSettings.Debug) Logger.Write("Block upd Ardu - current: 0b" + Convert.ToString(CurrentLightState, 2).PadLeft(8,'0') + " old: 0b" + Convert.ToString(StateLightArduino, 2).PadLeft(8, '0'));
                     SendStateToArduino(CurrentLightState);
                 }
-                else orderUpdate = 0;
+                else OrderUpdate = 0;
             }
             else if (StateLightArduino != CurrentLightState)
             {
-                Logger.Write("Change Ardu - current: 0b" + Convert.ToString(CurrentLightState, 2).PadRight(8, '0') + " new: 0b" + Convert.ToString(StateLightArduino, 2).PadRight(8, '0'));
+                if (ApplicationSettings.Debug) Logger.Write("Change Ardu - current: 0b" + Convert.ToString(CurrentLightState, 2).PadLeft(8, '0') + " new: 0b" + Convert.ToString(StateLightArduino, 2).PadLeft(8, '0'));
                 CurrentLightState = StateLightArduino;
 
                 SendStateToHttp(StateLightArduino);
 
-                orderUpdate = 1;    // Aktualizuje http na mocy Arduino
+                OrderUpdate = 1;    // Aktualizuje http na mocy Arduino
             } 
             else if (StateLightHttp != CurrentLightState)
             {
-                Logger.Write("Change http - current: 0b" + Convert.ToString(CurrentLightState, 2).PadRight(8, '0') + " new: 0b" + Convert.ToString(StateLightHttp, 2).PadRight(8, '0'));
+                if (ApplicationSettings.Debug) Logger.Write("Change http - current: 0b" + Convert.ToString(CurrentLightState, 2).PadLeft(8, '0') + " new: 0b" + Convert.ToString(StateLightHttp, 2).PadLeft(8, '0'));
                 CurrentLightState = StateLightHttp;
 
                 SendStateToArduino(StateLightHttp);
 
-                orderUpdate = 2;    // Aktualizuje Arduino na mocy http
+                OrderUpdate = 2;    // Aktualizuje Arduino na mocy http
             }
         }
 
@@ -116,7 +114,7 @@ namespace RaspberryPiBrain
             }
         }
 
-        public static string[] domNames = ["GoscinnyDuze", "GoscinnyMale", "Kuchnia", "Przedpokoj", "WC", "Sypialnia", "Aux", "ChoinkaLampka"];
+        private static readonly string[] domNames = ["GoscinnyDuze", "GoscinnyMale", "Kuchnia", "Przedpokoj", "WC", "Sypialnia", "Aux", "ChoinkaLampka"];
         private byte StateLightHttp { get; set; }
         public void SetStateHttp(List<DomModel> httpData)
         {
@@ -164,29 +162,16 @@ namespace RaspberryPiBrain
             StateLightHttp = newStateHttp;
         }
 
+#pragma warning disable CS8618 // Pole niedopuszczające wartości null musi zawierać wartość inną niż null podczas kończenia działania konstruktora. Rozważ dodanie modyfikatora „required” lub zadeklarowanie go jako dopuszczającego wartość null.
         public string FrameToSendArduinoLight {  get; set; }
+#pragma warning restore CS8618 // Pole niedopuszczające wartości null musi zawierać wartość inną niż null podczas kończenia działania konstruktora. Rozważ dodanie modyfikatora „required” lub zadeklarowanie go jako dopuszczającego wartość null.
         private void SendStateToArduino(byte newStateArduino)
         {
             FrameToSendArduinoLight = newStateArduino + "\r\n";
-            Logger.Write("SendStateToArduino: " + Convert.ToString(newStateArduino, 2).PadRight(8, '0'));
-            //return;
-
-            //// Aktualizuje stan ADR na podstawie http
-            //byte negStateArduino = (byte)~newStateArduino;
-            //string numberString = negStateArduino.ToString();
-            //byte[] byteArray = Array.ConvertAll(numberString.ToCharArray(), c => (byte)c);
-            //Array.Reverse(byteArray);
-
-            //FrameToSendArduinoLight = [..byteArray, 0x0D, 0x0A];
-
-            //string numberString2 = string.Concat(Array.ConvertAll(byteArray, b => (char)b));
-
-            //// Usunięcie potencjalnych znaków nieliczbowych (np. spacji lub innych symboli)
-            //numberString2 = string.Concat(numberString2.Where(char.IsDigit));
-
-            //// Konwersja na int
-            //if (int.TryParse(numberString2, out int result))
-            //    Logger.Write("SendStateToArduino: 0b" + Convert.ToString(result, 2).PadRight(8, '0'));
+            if (ApplicationSettings.Debug) Logger.Write("SendStateToArduino: " + Convert.ToString(newStateArduino, 2).PadLeft(8, '0'));
         }
+
+        public bool ChoinkaLampkaState
+            => (CurrentLightState & 0x40) > 0;
     }
 }
