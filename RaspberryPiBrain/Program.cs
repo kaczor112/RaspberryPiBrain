@@ -11,7 +11,7 @@ namespace RaspberryPiBrain
         {
             try
             {
-                string versionOfBrainRPI = "Run RaspberryPiBrain v0.02";
+                string versionOfBrainRPI = "Run RaspberryPiBrain v0.03";
                 ApplicationSettings.CheckRefresh();
 
                 Logger.Write(versionOfBrainRPI);

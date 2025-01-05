@@ -84,7 +84,7 @@ namespace MainComponents
         {
             if (_serialPort != null && _serialPort.IsOpen && data != null)
             {
-                Logger.Frame("Send", data);
+                if (ApplicationSettings.FrameLogs) Logger.Frame("Send", data);
                 _serialPort.Write(data, 0, data.Length);
             }
         }
@@ -106,7 +106,7 @@ namespace MainComponents
 
                         _serialPort.Read(readByts, 0, readByts.Length);
 
-                        Logger.Frame("Receive", readByts);
+                        if(ApplicationSettings.FrameLogs) Logger.Frame("Receive", readByts);
 
                         DataReceived?.Invoke(readByts);
                     }

@@ -10,6 +10,7 @@ namespace Model
     {
         public bool RefreshSettings { get; set; }
         public bool Debug { get; set; }
+        public bool FrameLogs { get; set; }
 #pragma warning disable CS8618 // Pole niedopuszczające wartości null musi zawierać wartość inną niż null podczas kończenia działania konstruktora. Rozważ dodanie modyfikatora „required” lub zadeklarowanie go jako dopuszczającego wartość null.
         public string GniazdkaSerial { get; set; }
         public string OswietlenieSerial { get; set; }
@@ -26,6 +27,7 @@ namespace Model
                 {
                     RefreshSettings = true,
                     Debug = true,
+                    FrameLogs = true,
                     GniazdkaSerial = "/dev/ttyACM0",
                     OswietlenieSerial = "/dev/ttyUSB0",
                     LoopDelay = 500,

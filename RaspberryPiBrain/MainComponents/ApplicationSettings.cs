@@ -75,6 +75,12 @@ namespace MainComponents
             get => GetSetting<bool>(nameof(Debug));
             set => SetSetting(nameof(Debug), value);
         }
+        
+        public static bool FrameLogs
+        {
+            get => GetSetting<bool>(nameof(FrameLogs));
+            set => SetSetting(nameof(FrameLogs), value);
+        }
 
         public static string GniazdkaSerial
         {
