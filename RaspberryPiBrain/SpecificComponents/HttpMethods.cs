@@ -15,6 +15,8 @@ namespace RaspberryPiBrain
     {
         public List<DomModel> NetworkModel { get; private set; }
 
+        private event Action<List<DomModel>> DataReceived;
+
         private int counterError { get; set; } = 0;
         private async Task LoadValuesOfDom()
         {
@@ -38,7 +40,11 @@ namespace RaspberryPiBrain
 
                     List<DomModel>? domList = JsonSerializer.Deserialize<List<DomModel>>(jsonData);
 
-                    if (domList != null) NetworkModel = domList;
+                    if (domList != null)
+                    {
+                        NetworkModel = domList;
+                        DataReceived?.Invoke(domList);
+                    }
                 }
                 else
                 {

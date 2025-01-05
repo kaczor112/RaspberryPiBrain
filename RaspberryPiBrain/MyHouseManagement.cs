@@ -189,5 +189,27 @@ namespace RaspberryPiBrain
                 else if(tempCzujnikZmierzchu == "OFF") CzujnikZmierzchu = false;
             }
         }
+
+
+        private byte LastDataSend { get; set; } = 0x00;
+        public byte[] FrameToSendGniazdka
+        {
+            get
+            {
+                byte data = 0x30; // <- Początek licz w ASCII
+                if (ChoinkaLampkaState) data += 0b00000001;
+                if (((DateTime.Now.Hour >= 22) || (DateTime.Now.Hour < 6)) && CzujnikZmierzchu && (!GoscinnyDuzeLampkaState)) data += 0b00000010;
+
+                if (LastDataSend != data)
+                {
+                    LastDataSend = data;
+                    return [data, 0x0D, 0x0A];
+                }
+
+#pragma warning disable CS8603 // Możliwe zwrócenie odwołania o wartości null.
+                return null;
+#pragma warning restore CS8603 // Możliwe zwrócenie odwołania o wartości null.
+            }
+        }
     }
 }

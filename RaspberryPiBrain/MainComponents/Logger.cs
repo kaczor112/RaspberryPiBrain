@@ -22,7 +22,7 @@ namespace MainComponents
             }
         }
 
-        public static void Frame(string direction, byte[] frame)
+        public static void Frame(string device, string direction, byte[] frame)
         {
             try
             {
@@ -30,7 +30,7 @@ namespace MainComponents
 
                 string myMessege = DateTime.Now.ToString(ApplicationSettings.DateFormat) + " " + 
                     direction.PadRight(7) + ": " + string.Join(" ", frame.Select(b => b.ToString("X2")));
-                FileManagement.SaveLog("Frame", "Frame" + DateTime.Now.ToString("_yyyy.MM.dd"), myMessege);
+                FileManagement.SaveLog("Frame", "Frame_" + device + DateTime.Now.ToString("_yyyy.MM.dd"), myMessege);
             }
             catch (Exception ex)
             {

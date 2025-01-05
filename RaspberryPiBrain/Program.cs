@@ -11,38 +11,25 @@ namespace RaspberryPiBrain
         {
             try
             {
-                string versionOfBrainRPI = "Run RaspberryPiBrain v0.03";
+                /* Główny program na RaspberryPi do komunikacji pomiędzy serwerem a SmartHome */
+                string versionOfBrainRPI = "Run RaspberryPiBrain v0.04";
                 ApplicationSettings.CheckRefresh();
 
                 Logger.Write(versionOfBrainRPI);
                 if (!ApplicationSettings.Debug) Console.WriteLine(DateTime.Now + " " + versionOfBrainRPI);
 
-                /* Główny program na RaspberryPi do komunikacji pomiędzy serwerem a SmartHome 
-
-                Console.WriteLine("Running on: " + Directory.GetCurrentDirectory());
-                Console.WriteLine("Dostępne porty COM:");
-                var ports = SerialManagement.GetAvailablePorts();
-                if (ports?.Length > 0)
-                {
-                    foreach (var port in ports)
-                    {
-                        Console.WriteLine(port);
-                    }
-                }*/
-
-                using NetworkManagement networkManagement = new();
-
                 MyHouseManagement myHouse = new();
-                
-                using SerialManagement gniazdkaSerial = new(ApplicationSettings.GniazdkaSerial,
-                    data => { if (data != null) myHouse.SetCzujnikZmierzchu(data); });
-
-                using SerialManagement oswietlenieSerial = new(ApplicationSettings.OswietlenieSerial,
-                    data => { if (data?.Length < 10) myHouse.SetStateArduino(data); });
-
-                // TODO Disable log Serial
-
                 DateTime gniazdkaTime = DateTime.Now, oswietlenieTime = DateTime.Now;
+
+                using NetworkManagement networkManagement = new( data => { if (data != null) { myHouse.SetStateHttp(data);} });
+
+                using SerialManagement gniazdkaSerial = new("Gniazdka", ApplicationSettings.GniazdkaSerial,
+                    data => { if (data != null) { myHouse.SetCzujnikZmierzchu(data); gniazdkaTime = DateTime.Now; } });
+
+                using SerialManagement oswietlenieSerial = new("Oswietlenie", ApplicationSettings.OswietlenieSerial,
+                    data => { if (data?.Length < 10) { myHouse.SetStateArduino(data); oswietlenieTime = DateTime.Now; } });
+
+                bool CzujnikZmierzchu = false;
 
                 try
                 {
@@ -52,31 +39,19 @@ namespace RaspberryPiBrain
 
                     myHouse.InitFromArduino();
 
-                    bool MainLoop = true; byte lastDataSend = 0x00; bool sendOswietlenie = false;
-
-                    Logger.Write("Uruchamiam pętle główną");
-
-                    while (MainLoop)
+                    while (true)
                     {
-                        if(DateTime.Now.Minute != gniazdkaTime.Minute)  // Odświeźam raz na minute
+                        if(DateTime.Now > gniazdkaTime.AddMinutes(1))  // Odświeźam raz na minute
                         {
                             gniazdkaSerial.SendData(MyHouseManagement.GetStateArduino);
-                            gniazdkaTime = DateTime.Now;
                         }
 
-                        if (((DateTime.Now.Second) != (oswietlenieTime.Second)) || sendOswietlenie)  // Odświeźam raz na 10 sek
+                        if (DateTime.Now > oswietlenieTime.AddSeconds(1))
                         {
                             oswietlenieSerial.SendData(MyHouseManagement.GetStateArduino);
-                            oswietlenieTime = DateTime.Now;
-                            sendOswietlenie = false;
                         }
 
                         Thread.Sleep(ApplicationSettings.LoopDelay);
-
-                        if (networkManagement.NetworkModel != null)
-                        {
-                            myHouse.SetStateHttp(networkManagement.NetworkModel);
-                        }
 
                         myHouse.HeartBeat();
 
@@ -84,18 +59,16 @@ namespace RaspberryPiBrain
                         {
                             oswietlenieSerial.SendData(myHouse.FrameToSendArduinoLight);
                             myHouse.FrameToSendArduinoLight = null;
-                            sendOswietlenie = true;
                             Thread.Sleep(ApplicationSettings.LoopDelay);
                         }
 
-                        byte data = 0x30; // <- Początek licz w ASCII
-                        if (myHouse.ChoinkaLampkaState) data += 0b00000001;
-                        if (((DateTime.Now.Hour >= 22) || (DateTime.Now.Hour < 6)) && myHouse.CzujnikZmierzchu && (!myHouse.GoscinnyDuzeLampkaState)) data += 0b00000010;
+                        byte[] gniazdkaFrameToSend = myHouse.FrameToSendGniazdka;
+                        if(gniazdkaFrameToSend != null) gniazdkaSerial.SendData(gniazdkaFrameToSend);
 
-                        if (lastDataSend != data)
+                        if(CzujnikZmierzchu != myHouse.CzujnikZmierzchu)
                         {
-                            gniazdkaSerial.SendData([data, 0x0D, 0x0A]);
-                            lastDataSend = data;
+                            Logger.Write("Czujnik zmierzchu: " + myHouse.CzujnikZmierzchu);
+                            CzujnikZmierzchu = myHouse.CzujnikZmierzchu;
                         }
                     }
                 }

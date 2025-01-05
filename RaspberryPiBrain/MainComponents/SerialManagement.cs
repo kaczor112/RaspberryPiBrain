@@ -12,20 +12,23 @@ namespace MainComponents
         private bool SerialRunning { get; set; } = true;
 
         private event Action<byte[]> DataReceived;
+        private string DeviceName { get; set; }
 
 #pragma warning disable CS8618 // Pole niedopuszczające wartości null musi zawierać wartość inną niż null podczas kończenia działania konstruktora. Rozważ dodanie modyfikatora „required” lub zadeklarowanie go jako dopuszczającego wartość null.
-        public SerialManagement(string portName, int baudRate = 115200)
+        public SerialManagement(string deviceName, string portName, int baudRate = 115200)
         {
             DataReceived += data => Logger.Write($"Odebrano: {Encoding.UTF8.GetString(data)}");
 
+            DeviceName = deviceName;
             SerialRunning = true;
             OpenPort(portName, baudRate);
         }
 
-        public SerialManagement(string portName, Action<byte[]> dataReceived, int baudRate = 115200)
+        public SerialManagement(string deviceName, string portName, Action<byte[]> dataReceived, int baudRate = 115200)
         {
             DataReceived += dataReceived;
 
+            DeviceName = deviceName;
             SerialRunning = true;
             OpenPort(portName, baudRate);
         }

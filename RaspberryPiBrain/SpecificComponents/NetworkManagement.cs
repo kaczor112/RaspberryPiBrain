@@ -1,4 +1,5 @@
 ﻿using MainComponents;
+using Model;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,6 +15,13 @@ namespace RaspberryPiBrain
 
         public NetworkManagement()
         {
+            RunLoop = true;
+            _ = Task.Run(RefreshLoop);
+        }
+
+        public NetworkManagement(Action<List<DomModel>> dataReceived)
+        {
+            DataReceived += dataReceived;
             RunLoop = true;
             _ = Task.Run(RefreshLoop);
         }
