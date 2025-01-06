@@ -12,7 +12,7 @@ namespace RaspberryPiBrain
             try
             {
                 /* Główny program na RaspberryPi do komunikacji pomiędzy serwerem a SmartHome */
-                string versionOfBrainRPI = "Run RaspberryPiBrain v0.04";
+                string versionOfBrainRPI = "Run RaspberryPiBrain v0.05";
                 ApplicationSettings.CheckRefresh();
 
                 Logger.Write(versionOfBrainRPI);
@@ -21,7 +21,7 @@ namespace RaspberryPiBrain
                 MyHouseManagement myHouse = new();
                 DateTime gniazdkaTime = DateTime.Now, oswietlenieTime = DateTime.Now;
 
-                using NetworkManagement networkManagement = new( data => { if (data != null) { myHouse.SetStateHttp(data);} });
+                using NetworkManagement networkManagement = new( data => { if (data != null) { myHouse.SetStateHttp(data); } });
 
                 using SerialManagement gniazdkaSerial = new("Gniazdka", ApplicationSettings.GniazdkaSerial,
                     data => { if (data != null) { myHouse.SetCzujnikZmierzchu(data); gniazdkaTime = DateTime.Now; } });
@@ -51,15 +51,12 @@ namespace RaspberryPiBrain
                             oswietlenieSerial.SendData(MyHouseManagement.GetStateArduino);
                         }
 
-                        Thread.Sleep(ApplicationSettings.LoopDelay);
-
                         myHouse.HeartBeat();
 
                         if(myHouse.FrameToSendArduinoLight != null)
                         {
                             oswietlenieSerial.SendData(myHouse.FrameToSendArduinoLight);
                             myHouse.FrameToSendArduinoLight = null;
-                            Thread.Sleep(ApplicationSettings.LoopDelay);
                         }
 
                         byte[] gniazdkaFrameToSend = myHouse.FrameToSendGniazdka;
@@ -70,6 +67,8 @@ namespace RaspberryPiBrain
                             Logger.Write("Czujnik zmierzchu: " + myHouse.CzujnikZmierzchu);
                             CzujnikZmierzchu = myHouse.CzujnikZmierzchu;
                         }
+                            
+                        Thread.Sleep(ApplicationSettings.LoopDelay);
                     }
                 }
                 catch (Exception ex)

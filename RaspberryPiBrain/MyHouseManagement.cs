@@ -167,7 +167,7 @@ namespace RaspberryPiBrain
         private void SendStateToArduino(byte newStateArduino)
         {
             FrameToSendArduinoLight = newStateArduino + "\r\n";
-            if (ApplicationSettings.Debug) Logger.Write("SendStateToArduino: " + Convert.ToString(newStateArduino, 2).PadLeft(8, '0'));
+            //if (ApplicationSettings.Debug) Logger.Write("SendStateToArduino: " + Convert.ToString(newStateArduino, 2).PadLeft(8, '0'));
         }
 
         public bool ChoinkaLampkaState

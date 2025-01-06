@@ -59,14 +59,31 @@ namespace MainComponents
             File.WriteAllText(Directory.GetCurrentDirectory() + "\\" + filePath, JsonSerializer.Serialize(model, jsonOptions));
         }
 
-        public static TModel? LoadModelFromFile<TModel>(string filePath)
+        public static TModel? LoadModelFromFile<TModel>(string filePath) => LoadModelFromFile<TModel>(filePath, 0);
+
+        private static TModel? LoadModelFromFile<TModel>(string filePath, int timeout)
         {
-            // TODO kiedy ktoś inny coś zapisze w pliku na chwile będzie exception
+            try
+            {
+                // Plik nie istnieje, zwróć null
+                if (!File.Exists(Directory.GetCurrentDirectory() + "\\" + filePath)) return default;
 
-            // Plik nie istnieje, zwróć null
-            if (!File.Exists(Directory.GetCurrentDirectory() + "\\" + filePath)) return default;
+                return JsonSerializer.Deserialize<TModel>(File.ReadAllText(Directory.GetCurrentDirectory() + "\\" + filePath));
+            }
+            catch (IOException e)
+            {
+                // Kiedy dwa procesy chcą dostęp do pliku (FileManagement i notepad++) to jest IOException
+                Thread.Sleep(10);
+                if(timeout < 100) return LoadModelFromFile<TModel>(filePath, ++timeout);
 
-            return JsonSerializer.Deserialize<TModel>(File.ReadAllText(Directory.GetCurrentDirectory() + "\\" + filePath));
+                ExceptionManagement.Log(e, "FileManagement", "LoadModelFromFileTimeout");
+            }
+            catch (Exception ex)
+            {
+                ExceptionManagement.Log(ex, "FileManagement", "LoadModelFromFile");
+            }
+
+            return default;
         }
     }
 }
