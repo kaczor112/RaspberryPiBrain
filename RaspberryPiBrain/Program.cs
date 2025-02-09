@@ -12,7 +12,7 @@ namespace RaspberryPiBrain
             try
             {
                 /* Główny program na RaspberryPi do komunikacji pomiędzy serwerem a SmartHome */
-                string versionOfBrainRPI = "Run RaspberryPiBrain v0.05";
+                string versionOfBrainRPI = "Run RaspberryPiBrain v0.06";
                 ApplicationSettings.CheckRefresh();
 
                 Logger.Write(versionOfBrainRPI);

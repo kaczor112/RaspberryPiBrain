@@ -196,9 +196,12 @@ namespace RaspberryPiBrain
         {
             get
             {
+                bool lampaOwadobojcza = false;
                 byte data = 0x30; // <- Początek licz w ASCII
-                if (ChoinkaLampkaState) data += 0b00000001;
-                if (((DateTime.Now.Hour >= 22) || (DateTime.Now.Hour < 6)) && CzujnikZmierzchu && (!GoscinnyDuzeLampkaState)) data += 0b00000010;
+                if (ChoinkaLampkaState) data += 0b00000001;     // tu normalnie jest Choinka, zostawiam ale będzie ta zmienna zmieniać stan od lampy owadobójczej.
+                if (((DateTime.Now.Hour >= 22) || (DateTime.Now.Hour < 6)) && CzujnikZmierzchu && (!GoscinnyDuzeLampkaState)) lampaOwadobojcza = true;
+                if (ChoinkaLampkaState) lampaOwadobojcza = !lampaOwadobojcza;
+                if (lampaOwadobojcza) data += 0b00000010;
 
                 if (LastDataSend != data)
                 {
